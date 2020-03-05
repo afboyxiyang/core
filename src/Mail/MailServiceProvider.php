@@ -11,7 +11,9 @@ namespace Flarum\Mail;
 
 use Flarum\Foundation\AbstractServiceProvider;
 use Flarum\Settings\SettingsRepositoryInterface;
+use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Mail\Mailer;
+use Illuminate\Support\Arr;
 use Swift_Mailer;
 
 class MailServiceProvider extends AbstractServiceProvider
@@ -24,19 +26,33 @@ class MailServiceProvider extends AbstractServiceProvider
                 'mailgun' => MailgunDriver::class,
                 'mandrill' => MandrillDriver::class,
                 'log' => LogDriver::class,
-                'ses' => SesDriver::class,
                 'smtp' => SmtpDriver::class,
             ];
         });
 
         $this->app->singleton('mail.driver', function () {
+            $configured = $this->app->make('flarum.mail.configured_driver');
             $settings = $this->app->make(SettingsRepositoryInterface::class);
-            $drivers = $this->app->make('mail.supported_drivers');
+            $validator = $this->app->make(Factory::class);
 
-            return $this->app->make($drivers[$settings->get('mail_driver')]);
+            return $configured->validate($settings, $validator)->any()
+                ? $this->app->make(NullDriver::class)
+                : $configured;
         });
 
         $this->app->alias('mail.driver', DriverInterface::class);
+
+        $this->app->singleton('flarum.mail.configured_driver', function () {
+            $drivers = $this->app->make('mail.supported_drivers');
+            $settings = $this->app->make(SettingsRepositoryInterface::class);
+            $driverName = $settings->get('mail_driver');
+
+            $driverClass = Arr::get($drivers, $driverName);
+
+            return $driverClass
+                ? $this->app->make($driverClass)
+                : $this->app->make(NullDriver::class);
+        });
 
         $this->app->singleton('swift.mailer', function ($app) {
             return new Swift_Mailer(

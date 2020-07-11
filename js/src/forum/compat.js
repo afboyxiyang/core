@@ -9,6 +9,10 @@ import DiscussionControls from './utils/DiscussionControls';
 import alertEmailConfirmation from './utils/alertEmailConfirmation';
 import UserControls from './utils/UserControls';
 import Pane from './utils/Pane';
+import DiscussionListState from './states/DiscussionListState';
+import GlobalSearchState from './states/GlobalSearchState';
+import NotificationListState from './states/NotificationListState';
+import SearchState from './states/SearchState';
 import DiscussionPage from './components/DiscussionPage';
 import LogInModal from './components/LogInModal';
 import ComposerBody from './components/ComposerBody';
@@ -23,7 +27,6 @@ import PostEdited from './components/PostEdited';
 import PostStream from './components/PostStream';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import IndexPage from './components/IndexPage';
-import Page from './components/Page';
 import DiscussionRenamedNotification from './components/DiscussionRenamedNotification';
 import DiscussionsSearchSource from './components/DiscussionsSearchSource';
 import HeaderSecondary from './components/HeaderSecondary';
@@ -78,6 +81,10 @@ export default Object.assign(compat, {
   'utils/alertEmailConfirmation': alertEmailConfirmation,
   'utils/UserControls': UserControls,
   'utils/Pane': Pane,
+  'states/DiscussionListState': DiscussionListState,
+  'states/GlobalSearchState': GlobalSearchState,
+  'states/NotificationListState': NotificationListState,
+  'states/SearchState': SearchState,
   'components/DiscussionPage': DiscussionPage,
   'components/LogInModal': LogInModal,
   'components/ComposerBody': ComposerBody,
@@ -92,7 +99,6 @@ export default Object.assign(compat, {
   'components/PostStream': PostStream,
   'components/ChangePasswordModal': ChangePasswordModal,
   'components/IndexPage': IndexPage,
-  'components/Page': Page,
   'components/DiscussionRenamedNotification': DiscussionRenamedNotification,
   'components/DiscussionsSearchSource': DiscussionsSearchSource,
   'components/HeaderSecondary': HeaderSecondary,
@@ -134,6 +140,6 @@ export default Object.assign(compat, {
   'components/DiscussionListItem': DiscussionListItem,
   'components/LoadingPost': LoadingPost,
   'components/PostsUserPage': PostsUserPage,
-  'routes': routes,
-  'ForumApplication': ForumApplication
+  routes: routes,
+  ForumApplication: ForumApplication,
 });

@@ -10,34 +10,23 @@ import icon from '../helpers/icon';
  * - `state` Whether or not the checkbox is checked.
  * - `className` The class name for the root element.
  * - `disabled` Whether or not the checkbox is disabled.
+ * - `loading` Whether or not the checkbox is loading.
  * - `onchange` A callback to run when the checkbox is checked/unchecked.
  * - `children` A text label to display next to the checkbox.
  */
 export default class Checkbox extends Component {
-  init() {
-    /**
-     * Whether or not the checkbox's value is in the process of being saved.
-     *
-     * @type {Boolean}
-     * @public
-     */
-    this.loading = false;
-  }
-
   view() {
+    // Sometimes, false is stored in the DB as '0'. This is a temporary
+    // conversion layer until a more robust settings encoding is introduced
+    if (this.props.state === '0') this.props.state = false;
     let className = 'Checkbox ' + (this.props.state ? 'on' : 'off') + ' ' + (this.props.className || '');
-    if (this.loading) className += ' loading';
+    if (this.props.loading) className += ' loading';
     if (this.props.disabled) className += ' disabled';
 
     return (
       <label className={className}>
-        <input type="checkbox"
-          checked={this.props.state}
-          disabled={this.props.disabled}
-          onchange={m.withAttr('checked', this.onchange.bind(this))}/>
-        <div className="Checkbox-display">
-          {this.getDisplay()}
-        </div>
+        <input type="checkbox" checked={this.props.state} disabled={this.props.disabled} onchange={m.withAttr('checked', this.onchange.bind(this))} />
+        <div className="Checkbox-display">{this.getDisplay()}</div>
         {this.props.children}
       </label>
     );
@@ -50,9 +39,7 @@ export default class Checkbox extends Component {
    * @protected
    */
   getDisplay() {
-    return this.loading
-      ? LoadingIndicator.component({size: 'tiny'})
-      : icon(this.props.state ? 'fas fa-check' : 'fas fa-times');
+    return this.props.loading ? LoadingIndicator.component({ size: 'tiny' }) : icon(this.props.state ? 'fas fa-check' : 'fas fa-times');
   }
 
   /**

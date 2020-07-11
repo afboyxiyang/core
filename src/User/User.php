@@ -23,6 +23,7 @@ use Flarum\Http\AccessToken;
 use Flarum\Http\UrlGenerator;
 use Flarum\Notification\Notification;
 use Flarum\Post\Post;
+use Flarum\User\DisplayName\DriverInterface;
 use Flarum\User\Event\Activated;
 use Flarum\User\Event\AvatarChanged;
 use Flarum\User\Event\CheckingPassword;
@@ -94,6 +95,13 @@ class User extends AbstractModel
     protected static $preferences = [];
 
     /**
+     * A driver for getting display names.
+     *
+     * @var DriverInterface
+     */
+    protected static $displayNameDriver;
+
+    /**
      * The hasher with which to hash passwords.
      *
      * @var Hasher
@@ -157,19 +165,21 @@ class User extends AbstractModel
     }
 
     /**
-     * @return Gate
-     */
-    public static function getGate()
-    {
-        return static::$gate;
-    }
-
-    /**
      * @param Gate $gate
      */
     public static function setGate($gate)
     {
         static::$gate = $gate;
+    }
+
+    /**
+     * Set the display name driver.
+     *
+     * @param DriverInterface $driver
+     */
+    public static function setDisplayNameDriver(DriverInterface $driver)
+    {
+        static::$displayNameDriver = $driver;
     }
 
     /**
@@ -309,7 +319,8 @@ class User extends AbstractModel
      */
     public function getDisplayNameAttribute()
     {
-        return static::$dispatcher->until(new GetDisplayName($this)) ?: $this->username;
+        // Event is deprecated in beta 14, remove in beta 15.
+        return static::$dispatcher->until(new GetDisplayName($this)) ?: static::$displayNameDriver->displayName($this);
     }
 
     /**
@@ -606,6 +617,11 @@ class User extends AbstractModel
         return $this->belongsToMany(Group::class);
     }
 
+    public function visibleGroups()
+    {
+        return $this->belongsToMany(Group::class)->where('is_hidden', false);
+    }
+
     /**
      * Define the relationship with the user's notifications.
      *
@@ -684,7 +700,7 @@ class User extends AbstractModel
      */
     public function can($ability, $arguments = [])
     {
-        return static::$gate->forUser($this)->allows($ability, $arguments);
+        return static::$gate->allows($this, $ability, $arguments);
     }
 
     /**
